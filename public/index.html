@@ -1,0 +1,61 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://bootswatch.com/journal/bootstrap.min.css">
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="row">
+        <div class="col-md-6">
+            <video autoplay></video>
+            <canvas style="display:none;"></canvas> <img></img>
+        </div>
+        <div class="col-md-6">
+            <div id="stream" style="width:320px"></div>
+        </div>
+    </div>
+    <script>
+        var socket = io.connect();
+        var video = document.querySelector('video');
+        var canvas = document.querySelector('canvas');
+        var img = document.querySelector('img');
+        var stream = document.getElementById("stream");
+        var ctx = canvas.getContext('2d');
+        video.addEventListener('click', snapshot, false);
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia;
+        if (!navigator.getUserMedia) {
+            alert('getUserMedia not available');
+        }
+        else {
+            navigator.getUserMedia({
+                video: true
+            }, function(stream) {
+                video.src = window.URL.createObjectURL(stream);
+            }, function(e) {
+                console.log(e);
+            });
+        }
+        socket.on('stream', function(data) {
+            //TODO animate the photo stream: https://facebook.github.io/react/docs/animation.html
+            //TODO react updates DOM
+            var newImg = document.createElement('img');
+            newImg.src = data;
+            console.log(newImg);
+            stream.insertBefore(newImg, stream.firstChild);
+        });
+
+        function snapshot() {
+            //TODO this forces a 320x240 aspect ratio for image, we should use what the video provides (scale width down to a limit)
+            canvas.width = 320;
+            canvas.height = 240;
+            ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+            var data = canvas.toDataURL('image/png');
+            socket.emit('photo', data);
+            console.log(data);
+            img.setAttribute('src', data);
+        }
+    </script>
+</body>
+
+</html>
