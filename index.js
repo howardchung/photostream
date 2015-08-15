@@ -19,10 +19,9 @@ if (process.env.HTTPS) {
         key: fs.readFileSync('key.pem'),
         cert: fs.readFileSync('cert.pem')
     };
-    var httpsServer = https.createServer(options, app).listen(process.env.HTTPS_PORT || 5001);
 }
 var app = express(options);
-var server = http.createServer(app).listen(process.env.PORT || 5000);
+var server = process.env.HTTPS ? https.createServer(options, app).listen(process.env.HTTPS_PORT || 5001) : http.createServer(app).listen(process.env.PORT || 5000);
 /*
 //var React = require("react");
 //var App = React.createFactory(require("./public/app"));
@@ -33,7 +32,7 @@ app.get("/", function(req, res) {
 */
 //TODO persist photos for some ttl, display recent/top photos for newly connected users?
 //pubsub through redis or socket.io?
-var io = require('socket.io')(server || httpsServer);
+var io = require('socket.io')(server);
 io.on('connection', function(socket) {
     socket.on('photo', function(data) {
         console.log('got photo');
