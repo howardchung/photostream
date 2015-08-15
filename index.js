@@ -18,8 +18,8 @@ var options = {
     cert: fs.readFileSync('cert.pem')
 };
 var app = express(options);
-//http.createServer(app).listen(process.env.PORT || 5000);
-var server = https.createServer(options, app).listen(process.env.PORT || 5000);
+var server = http.createServer(app).listen(process.env.PORT || 5000);
+var httpsServer = https.createServer(options, app).listen(process.env.HTTPS_PORT || 443);
 /*
 //var React = require("react");
 //var App = React.createFactory(require("./public/app"));
@@ -30,7 +30,7 @@ app.get("/", function(req, res) {
 */
 //TODO persist photos for some ttl, display recent/top photos for newly connected users?
 //pubsub through redis or socket.io?
-var io = require('socket.io')(server);
+var io = require('socket.io')(server || httpsServer);
 io.on('connection', function(socket) {
     socket.on('photo', function(data) {
         console.log('got photo');
