@@ -13,13 +13,16 @@ var http = require('http');
 var fs = require('fs');
 var cluster = require('cluster');
 var numCPUs = require('os').cpus().length;
-var options = {
-    key: fs.readFileSync('key.pem'),
-    cert: fs.readFileSync('cert.pem')
-};
+var options;
+if (process.env.HTTPS) {
+    options = {
+        key: fs.readFileSync('key.pem'),
+        cert: fs.readFileSync('cert.pem')
+    };
+    var httpsServer = https.createServer(options, app).listen(process.env.HTTPS_PORT || 5001);
+}
 var app = express(options);
 var server = http.createServer(app).listen(process.env.PORT || 5000);
-var httpsServer = https.createServer(options, app).listen(process.env.HTTPS_PORT || 443);
 /*
 //var React = require("react");
 //var App = React.createFactory(require("./public/app"));
